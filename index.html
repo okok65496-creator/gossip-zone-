@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রোফাইল গ্যালারি</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #0b1220;
+            --muted: #94a3b8;
+            --accent: #60a5fa;
+            --glass: rgba(255, 255, 255, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, #071130 0%, #061224 100%);
+            color: #e6eef8;
+            padding: 32px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin: 8px 0 0;
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            max-width: 1200px;
+            margin: 28px auto 60px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+            transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.22s;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.8);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 3px solid var(--accent);
+            background: var(--glass);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin: 0 0 4px 0;
+            color: #fff;
+        }
+
+        .id {
+            color: var(--muted);
+            font-size: 0.8rem;
+            margin: 0 0 8px 0;
+        }
+
+        .level {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .profile-section {
+            text-align: left;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .about-me {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .gossip-zone {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(96, 165, 250, 0.1);
+            color: var(--accent);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            border: 1px solid rgba(96, 165, 250, 0.2);
+        }
+
+        footer {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .preview-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.18s, visibility 0.18s;
+        }
+
+        .preview-modal.open {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .preview-backdrop {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.8));
+            backdrop-filter: blur(2px);
+        }
+
+        .preview-content {
+            width: 92%;
+            max-width: 1100px;
+            height: 82%;
+            background: #021024;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 20px 50px rgba(2, 6, 23, 0.9);
+        }
+
+        .preview-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            align-items: center;
+        }
+
+        .preview-toolbar .title {
+            flex: 1;
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-left: 8px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: var(--muted);
+            cursor: pointer;
+        }
+
+        .btn.primary {
+            background: linear-gradient(90deg, rgba(96, 165, 250, 0.12), rgba(96, 165, 250, 0.08));
+            border-color: rgba(96, 165, 250, 0.22);
+            color: var(--accent);
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: calc(100% - 44px);
+            border: 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .avatar {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            body {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>প্রোফাইল গ্যালারি</h1>
+        <p class="lead">প্রতিটি প্রোফাইলে ক্লিক করলে সংশ্লিষ্ট ওয়েবসাইটটি প্রিভিউ হবে</p>
+    </header>
+
+    <div id="peopleGrid" class="grid"></div>
+
+    <footer>
+        <p>যা পরিবর্তন করতে চান: ছবির src, নাম, এবং data-link</p>
+    </footer>
+
+    <!-- Preview Modal -->
+    <div id="preview" class="preview-modal" aria-hidden="true">
+        <div id="backdrop" class="preview-backdrop"></div>
+        <div class="preview-content">
+            <div class="preview-toolbar">
+                <div id="previewTitle" class="title">Preview</div>
+                <button id="openNewTab" class="btn primary">নতুন ট্যাবে খুলুন</button>
+                <button id="closePreview" class="btn">বন্ধ করুন</button>
+            </div>
+            <iframe id="previewFrame" class="preview-frame" title="Website Preview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const people = [
+            {
+                name: 'SNIPER', 
+                id: '20629151',
+                level: '14',
+                followers: '28',
+                following: '24',
+                visitors: '135',
+                about: "I'm Not Bad - I'm Just Rich",
+                img: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.com'
+            },
+            {
+                name: 'GHOST', 
+                id: '20629152',
+                level: '12',
+                followers: '45',
+                following: '32',
+                visitors: '210',
+                about: "Silent but deadly in the digital world",
+                img: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.org'
+            },
+            {
+                name: 'VENOM', 
+                id: '20629153',
+                level: '16',
+                followers: '67',
+                following: '45',
+                visitors: '298',
+                about: "Code with passion, deliver with precision",
+                img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.net'
+            },
+            {
+                name: 'NOVA', 
+                id: '20629154',
+                level: '11',
+                followers: '38',
+                following: '29',
+                visitors: '167',
+                about: "Creating digital experiences that shine bright",
+                img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.com'
+            },
+            {
+                name: 'CYPHER', 
+                id: '20629155',
+                level: '15',
+                followers: '52',
+                following: '38',
+                visitors: '245',
+                about: "Solving puzzles one line of code at a time",
+                img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.org'
+            },
+            {
+                name: 'ECHO', 
+                id: '20629156',
+                level: '13',
+                followers: '41',
+                following: '36',
+                visitors: '189',
+                about: "Making waves in the digital ocean",
+                img: 'https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=200&h=200&fit=crop&crop=face',
+                link: 'https://example.net'
+            }
+        ];
+
+        const grid = document.getElementById('peopleGrid');
+        const preview = document.getElementById('preview');
+        const previewFrame = document.getElementById('previewFrame');
+        const previewTitle = document.getElementById('previewTitle');
+        const openNewTabBtn = document.getElementById('openNewTab');
+        const closePreviewBtn = document.getElementById('closePreview');
+        const backdrop = document.getElementById('backdrop');
+        let currentLink = '';
+
+        function buildCards() {
+            grid.innerHTML = '';
+            people.forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.setAttribute('data-link', p.link);
+                el.innerHTML = `
+                    <div class="gossip-zone">[GOSSIP ZONE]</div>
+                    <div class="profile-header">
+                        <img class="avatar" src="${p.img}" alt="${p.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiMxZTI5NTEiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSIjOTRhM2I4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+JHtwLm5hbWUuY2hhckF0KDApfTwvdGV4dD48L3N2Zz4='">
+                        <div class="profile-info">
+                            <div class="name">${p.name}</div>
+                            <div class="id">id: ${p.id}</div>
+                            <div class="level">Lv.${p.level}</div>
+                        </div>
+                    </div>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-number">${p.followers}</div>
+                            <div class="stat-label">Followers</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">${p.following}</div>
+                            <div class="stat-label">Following</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-number">${p.visitors}</div>
+                            <div class="stat-label">Visitors</div>
+                        </div>
+                    </div>
+                    <div class="profile-section">
+                        <div class="section-title">Profile</div>
+                    </div>
+                    <div class="profile-section">
+                        <div class="section-title">About Me</div>
+                        <div class="about-me">${p.about}</div>
+                    </div>
+                `;
+                el.addEventListener('click', () => openPreview(i));
+                grid.appendChild(el);
+            });
+        }
+
+        function openPreview(index) {
+            const p = people[index];
+            previewTitle.textContent = p.name + ' — ' + p.id;
+            currentLink = p.link || '';
+            
+            // Show loading message
+            previewFrame.srcdoc = `
+                <!doctype html>
+                <meta charset="utf-8">
+                <title>Loading...</title>
+                <style>
+                    body {
+                        font-family: sans-serif;
+                        color: #1b2a44;
+                        padding: 20px;
+                        background: #fff;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                    .loading {
+                        text-align: center;
+                    }
+                </style>
+                <div class="loading">
+                    <h3>Loading preview...</h3>
+                </div>
+            `;
+            
+            preview.classList.add('open');
+            preview.setAttribute('aria-hidden', 'false');
+            
+            if (currentLink && currentLink.startsWith('http')) {
+                // Try to fetch and display the website
+                fetch(currentLink)
+                    .then(r => r.text())
+                    .then(t => {
+                        previewFrame.srcdoc = t.replace(/<meta[^>]*charset[^>]*>/i, '');
+                    })
+                    .catch(err => {
+                        previewFrame.srcdoc = `
+                            <!doctype html>
+                            <meta charset="utf-8">
+                            <title>Cannot preview</title>
+                            <style>
+                                body {
+                                    font-family: sans-serif;
+                                    color: #fff;
+                                    background: #021024;
+                                    padding: 20px;
+                                    display: flex;
+                                    flex-direction: column;
+                                    justify-content: center;
+                                    align-items: center;
+                                    height: 100vh;
+                                    margin: 0;
+                                    text-align: center;
+                                }
+                            </style>
+                            <h2>Preview unavailable due to remote server restrictions.</h2>
+                            <p>Click "নতুন ট্যাবে খুলুন" to open the site.</p>
+                        `;
+                    });
+            } else {
+                previewFrame.srcdoc = `
+                    <!doctype html>
+                    <meta charset="utf-8">
+                    <title>No link</title>
+                    <style>
+                        body {
+                            font-family: sans-serif;
+                            color: #fff;
+                            background: #021024;
+                            padding: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            text-align: center;
+                        }
+                    </style>
+                    <h2>Link missing</h2>
+                    <p>এই প্রোফাইলটির জন্য কোনো ওয়েবসাইট URL নির্ধারণ করা হয়নি।</p>
+                `;
+            }
+        }
+
+        function closePreview() {
+            preview.classList.remove('open');
+            preview.setAttribute('aria-hidden', 'true');
+            previewFrame.srcdoc = '';
+        }
+
+        openNewTabBtn.addEventListener('click', () => {
+            if (currentLink) window.open(currentLink, '_blank', 'noopener');
+        });
+
+        closePreviewBtn.addEventListener('click', closePreview);
+        backdrop.addEventListener('click', closePreview);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePreview();
+        });
+
+        // Initialize the gallery
+        buildCards();
+    </script>
+</body>
+</html>
