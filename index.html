@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রোফাইল গ্যালারি</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #0b1220;
+            --muted: #94a3b8;
+            --accent: #60a5fa;
+            --glass: rgba(255, 255, 255, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background: linear-gradient(180deg, #071130 0%, #061224 100%);
+            color: #e6eef8;
+            padding: 32px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.6rem;
+        }
+
+        p.lead {
+            color: var(--muted);
+            margin: 8px 0 0;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            max-width: 1400px;
+            margin: 28px auto 60px;
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
+            transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.22s;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(2, 6, 23, 0.8);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 3px solid var(--accent);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .name {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin: 0 0 5px 0;
+            color: #ffffff;
+        }
+
+        .id {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin: 0 0 8px 0;
+        }
+
+        .gossip-zone {
+            background: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+            border: 1px solid rgba(74, 144, 226, 0.3);
+        }
+
+        .level-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .level {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .vip {
+            background: linear-gradient(45deg, #ffd700, #ffa500);
+            color: black;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            color: #4a90e2;
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 15px 0 8px 0;
+            text-transform: uppercase;
+        }
+
+        .about-me {
+            color: #ccc;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        footer {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 60;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.18s, visibility 0.18s;
+        }
+
+        .preview-modal.open {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .preview-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(2, 6, 23, 0.6), rgba(2, 6, 23, 0.8));
+            backdrop-filter: blur(2px);
+        }
+
+        .preview-content {
+            width: 92%;
+            max-width: 1100px;
+            height: 82%;
+            background: #021024;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 20px 50px rgba(2, 6, 23, 0.9);
+        }
+
+        .preview-toolbar {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0.01));
+            align-items: center;
+        }
+
+        .preview-toolbar .title {
+            flex: 1;
+            color: var(--muted);
+            font-size: 0.95rem;
+            padding-left: 8px;
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn.primary {
+            background: linear-gradient(90deg, rgba(96, 165, 250, 0.12), rgba(96, 165, 250, 0.08));
+            border-color: rgba(96, 165, 250, 0.22);
+            color: var(--accent);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: calc(100% - 44px);
+            border: 0;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 16px;
+            }
+            
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .avatar {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            body {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>প্রোফাইল গ্যালারি</h1>
+        <p class="lead">প্রতিটি প্রোফাইলে ক্লিক করলে সংশ্লিষ্ট ওয়েবসাইটটি প্রিভিউ হবে</p>
+    </header>
+
+    <div id="peopleGrid" class="grid"></div>
+
+    <footer>
+        <p>প্রয়োজন অনুযায়ী প্রোফাইল তথ্য পরিবর্তন করুন</p>
+    </footer>
+
+    <!-- Preview Modal -->
+    <div id="preview" class="preview-modal" aria-hidden="true">
+        <div id="backdrop" class="preview-backdrop"></div>
+        <div class="preview-content">
+            <div class="preview-toolbar">
+                <div id="previewTitle" class="title">Preview</div>
+                <button id="openNewTab" class="btn primary">নতুন ট্যাবে খুলুন</button>
+                <button id="closePreview" class="btn">বন্ধ করুন</button>
+            </div>
+            <iframe id="previewFrame" class="preview-frame" title="Website Preview"></iframe>
+        </div>
+    </div>
+
+    <script>
+        const people = [
+            {
+                name: 'SNIPER',
+                id: '20629151',
+                level: '14',
+                vip: '',
+                followers: '28',
+                following: '24',
+                visitors: '135',
+                about: "I'm Not Bad - I'm Just Rich",
+                img: 'images/profile1.jpg',
+                link: 'https://example.com'
+            },
+            {
+                name: 'Root',
+                id: '12874371',
+                level: '84',
+                vip: 'SVIP3',
+                followers: '274',
+                following: '73',
+                visitors: '1.1K',
+                about: "",
+                img: 'images/profile2.jpg',
+                link: 'https://example.org'
+            },
+            {
+                name: 'XELPHIRRAE',
+                id: '845548',
+                level: '50',
+                vip: 'SVIP4',
+                followers: '99',
+                following: '29',
+                visitors: '328',
+                about: "I love my mother more than life. Time is gold",
+                img: 'images/profile3.jpg',
+                link: 'https://example.net'
+            },
+            {
+                name: 'Mr. ABIR',
+                id: '10539355',
+                level: '78',
+                vip: 'SVIP2',
+                followers: '1.1K',
+                following: '72',
+                visitors: '5.9K',
+                about: "Hi, I let love",
+                img: 'images/profile4.jpg',
+                link: 'https://example.com'
+            },
+            {
+                name: 'invictible',
+                id: '14902930',
+                level: '30',
+                vip: '',
+                followers: '86',
+                following: '20',
+                visitors: '299',
+                about: "📌️❤️ Embrace the journey . Believe in yourself and you're halfway there . Life is a canvas-paint it with your dreams . Rise above the storm, you'll💡❤️",
+                img: 'images/profile5.jpg',
+                link: 'https://example.org'
+            },
+            {
+                name: 'DISTOMATIC',
+                id: '10346893',
+                level: '61',
+                vip: '',
+                followers: '54.5',
+                following: '25',
+                visitors: '1.7K',
+                about: "3D WORLD,YOU'RE MULTIDIMENSIONAL. 2D LOVE,DIMENSIONLESS ME...",
+                img: 'images/profile6.jpg',
+                link: 'https://example.net'
+            },
+            {
+                name: 'QUincy',
+                id: '15416577',
+                level: '39',
+                vip: '',
+                followers: '473',
+                following: '16',
+                visitors: '1.3K',
+                about: "You starst the game show you how to play..!",
+                img: 'images/profile7.jpg',
+                link: 'https://example.com'
+            },
+            {
+                name: 'Decent',
+                id: '21198428',
+                level: '',
+                vip: '',
+                followers: '',
+                following: '',
+                visitors: '',
+                about: "",
+                img: 'images/profile8.jpg',
+                link: 'https://example.org'
+            },
+            {
+                name: 'ALVINA',
+                id: '19431174',
+                level: '33',
+                vip: '',
+                followers: '54',
+                following: '408',
+                visitors: '',
+                about: "I don't have time to value anyone just do what I say.",
+                img: 'images/profile9.jpg',
+                link: 'https://example.net'
+            },
+            {
+                name: 'Its over 25',
+                id: '7001',
+                level: '91',
+                vip: 'SVIPS',
+                followers: '508',
+                following: '73',
+                visitors: '1.7K',
+                about: "Busy In My Owen World",
+                img: 'images/profile10.jpg',
+                link: 'https://example.com'
+            }
+        ];
+
+        const grid = document.getElementById('peopleGrid');
+        const preview = document.getElementById('preview');
+        const previewFrame = document.getElementById('previewFrame');
+        const previewTitle = document.getElementById('previewTitle');
+        const openNewTabBtn = document.getElementById('openNewTab');
+        const closePreviewBtn = document.getElementById('closePreview');
+        const backdrop = document.getElementById('backdrop');
+        let currentLink = '';
+
+        function buildCards() {
+            grid.innerHTML = '';
+            people.forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'card';
+                el.setAttribute('data-link', p.link);
+                
+                let levelSection = '';
+                if (p.level || p.vip) {
+                    levelSection = `
+                        <div class="level-section">
+                            ${p.vip ? `<div class="vip">${p.vip}</div>` : ''}
+                            ${p.level ? `<div class="level">Lv.${p.level}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                let statsSection = '';
+                if (p.followers || p.following || p.visitors) {
+                    statsSection = `
+                        <div class="stats">
+                            <div class="stat">
+                                <div class="stat-number">${p.followers}</div>
+                                <div class="stat-label">Followers</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">${p.following}</div>
+                                <div class="stat-label">Following</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">${p.visitors}</div>
+                                <div class="stat-label">Visitors</div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                el.innerHTML = `
+                    <div class="profile-header">
+                        <img class="avatar" src="${p.img}" alt="${p.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiMzMzMiLz48dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmaWxsPSIjNjY2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+JHtwLm5hbWUuY2hhckF0KDApfTwvdGV4dD48L3N2Zz4='">
+                        <div class="profile-info">
+                            <div class="name">${p.name}</div>
+                            <div class="id">id: ${p.id}</div>
+                            <div class="gossip-zone">GOSSIP ZONE</div>
+                            ${levelSection}
+                        </div>
+                    </div>
+                    ${statsSection}
+                    <div class="section-title">Profile</div>
+                    <div class="section-title">About Me</div>
+                    <div class="about-me">${p.about}</div>
+                `;
+                
+                el.addEventListener('click', () => openPreview(i));
+                grid.appendChild(el);
+            });
+        }
+
+        function openPreview(index) {
+            const p = people[index];
+            previewTitle.textContent = p.name + ' — ' + p.id;
+            currentLink = p.link || '';
+            
+            // Show loading message
+            previewFrame.srcdoc = `
+                <!doctype html>
+                <meta charset="utf-8">
+                <title>Loading...</title>
+                <style>
+                    body {
+                        font-family: sans-serif;
+                        color: #1b2a44;
+                        padding: 20px;
+                        background: #fff;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                    .loading {
+                        text-align: center;
+                    }
+                </style>
+                <div class="loading">
+                    <h3>Loading preview...</h3>
+                </div>
+            `;
+            
+            preview.classList.add('open');
+            preview.setAttribute('aria-hidden', 'false');
+            
+            if (currentLink && currentLink.startsWith('http')) {
+                // Try to fetch and display the website
+                fetch(currentLink)
+                    .then(r => r.text())
+                    .then(t => {
+                        previewFrame.srcdoc = t.replace(/<meta[^>]*charset[^>]*>/i, '');
+                    })
+                    .catch(err => {
+                        previewFrame.srcdoc = `
+                            <!doctype html>
+                            <meta charset="utf-8">
+                            <title>Cannot preview</title>
+                            <style>
+                                body {
+                                    font-family: sans-serif;
+                                    color: #fff;
+                                    background: #021024;
+                                    padding: 20px;
+                                    display: flex;
+                                    flex-direction: column;
+                                    justify-content: center;
+                                    align-items: center;
+                                    height: 100vh;
+                                    margin: 0;
+                                    text-align: center;
+                                }
+                            </style>
+                            <h2>Preview unavailable due to remote server restrictions.</h2>
+                            <p>Click "নতুন ট্যাবে খুলুন" to open the site.</p>
+                        `;
+                    });
+            } else {
+                previewFrame.srcdoc = `
+                    <!doctype html>
+                    <meta charset="utf-8">
+                    <title>No link</title>
+                    <style>
+                        body {
+                            font-family: sans-serif;
+                            color: #fff;
+                            background: #021024;
+                            padding: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: center;
+                            align-items: center;
+                            height: 100vh;
+                            margin: 0;
+                            text-align: center;
+                        }
+                    </style>
+                    <h2>Link missing</h2>
+                    <p>এই প্রোফাইলটির জন্য কোনো ওয়েবসাইট URL নির্ধারণ করা হয়নি।</p>
+                `;
+            }
+        }
+
+        function closePreview() {
+            preview.classList.remove('open');
+            preview.setAttribute('aria-hidden', 'true');
+            previewFrame.srcdoc = '';
+        }
+
+        openNewTabBtn.addEventListener('click', () => {
+            if (currentLink) window.open(currentLink, '_blank', 'noopener');
+        });
+
+        closePreviewBtn.addEventListener('click', closePreview);
+        backdrop.addEventListener('click', closePreview);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePreview();
+        });
+
+        // Initialize the gallery
+        buildCards();
+    </script>
+</body>
+              </html>
